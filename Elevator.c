@@ -106,56 +106,85 @@ struct Node* AssignFloors(struct Node* head, int numOfFloors)
 	return userList;
 }
 
-//Arranges the data contained by smallest to biggest
+//Arranges the data contained by smallest to largest
 struct Node* OrganizeFloors(struct Node* userList)
 {
-	//holds a reference to the original list
-	struct Node* headref = userList;
+    struct Node* head; 
+	struct Node* temp;
+	int swap = 0;
 
-	while (userList->next != NULL)
-	{
-		//holds a temporary reference of a temporary list..
-		struct Node* temp = userList;
-		while (userList->next != NULL)
-		{
-			//Swaps elements
-			if (userList->data > userList->next->data)
-			{
-				int temp = userList->data;
-				userList->data = userList->next->data;
-				userList->next->data = temp;
-			}
-			userList = userList->next;
-		}
-		//Restore semi-temporary list
-		userList = temp;
-		userList = userList->next;
-	}
-
-	//Restore the original list with updated data
-	userList = headref;
-
-	DeleteList(&headref);
+	do
+    { 
+		swap = 0; 
+		head = userList;
+		temp = NULL;
+  
+		while (head->next != NULL) 
+		{ 
+			if (head->data > head->next->data) 
+			{  
+				int temp = head->data; 
+				head->data = head->next->data; 
+				head->next->data = temp; 
+                swap = 1; 
+            } 
+            head = head->next; 
+        } 
+        
+		temp = head; 
+    } 
+    while (swap); 
 
 	return userList;
 }
 
-//Returns the last data value from the refinedUser link list
-int ChangeFloor(struct Node* refinedUser)
+//Displays the floors changing in the Console and updates the current floor
+int ChangeFloor(struct Node* refinedUser, struct Node* floors, int currentFloor, int numOfFloors)
 {
-	struct Node* headref = refinedUser;
-	while (refinedUser->next != NULL)
+	for(int j = 0; j < numOfFloors; j++) 
 	{
+		int difference = refinedUser->data - currentFloor;
+
+		if(difference > 0) 
+		{
+			struct Node* tempFloor = floors;
+			while(tempFloor->data < currentFloor) 
+			{
+				tempFloor = tempFloor->next;
+			}
+
+			while(tempFloor->data < refinedUser->data) 
+			{
+					printf("%d, ", tempFloor->next->data);
+					tempFloor = tempFloor->next;
+			}
+		}
+
+		else if(difference < 0)
+		{
+			struct Node* tempFloor = floors;
+			while(tempFloor->data < currentFloor) 
+			{
+				tempFloor = tempFloor->next;
+			}
+
+			while(tempFloor->data > refinedUser->data) 
+			{
+				printf("%d, ", tempFloor->previous->data);
+				tempFloor = tempFloor->previous;
+			}
+		}
+
+		else
+		{
+			printf("Oops! You were already on that floor.");
+		}
+		printf(" Ding!\n");
+		currentFloor = refinedUser->data;
 		refinedUser = refinedUser->next;
 	}
-
-	int newFloor = refinedUser->data;
-	refinedUser = headref;
-
-	return newFloor;
+	return currentFloor;
 }
-
-
 
 
 
@@ -182,29 +211,25 @@ int main()
 
 		printf("You are currently on floor %d. The top floor is 15.\n", currentFloor);
 
-		printf("How many floors would you like to move between? ");
+		printf("How many floors would you like travel to? ");
 		scanf("%d", &numOfFloors);
+		printf("\n");
 
 		//Places desired floors into a list, then sorts them by size
 		struct Node* rawUser = AssignFloors(floors, numOfFloors);
 		struct Node* refinedUser = OrganizeFloors(rawUser);
 
 		printf("\nHere we go!\n");
-		print_list(refinedUser);
-		printf("Ding!\n\n");
 
-		currentFloor = ChangeFloor(refinedUser);
+		currentFloor = ChangeFloor(refinedUser, floors, currentFloor, numOfFloors);
 
 
-
-		//ride again if input is 'y'
-		printf("Would you like to change floors? Enter y if yes or any other key if not.\n");
+		printf("\nWould you like to change floors? Enter y if yes or any other key if not.\n");
 
 		scanf("%s", &again);
 
 		printf("\n");
-
-	} while (again == 'y');
+	} while(again == 'y');
 
 	return 0;
 }
